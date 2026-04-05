@@ -1,0 +1,32 @@
+module ClassList
+  VERSION: String
+
+  def self.normalize: (String | Symbol | Array[untyped] | nil value) -> Array[String]
+  def self.tokens: (?untyped base, **untyped operations) -> Array[String]
+  def self.resolve: (?untyped base, **untyped operations) -> String
+  def self.call: (?untyped base, **untyped operations) -> String
+  def self.list: (?untyped base) -> List
+end
+
+module ClassList::Tokenizer
+  def self.call: (String | Symbol | Array[untyped] | nil value) -> Array[String]
+end
+
+module ClassList::Resolver
+  ALLOWED_KEYS: Array[Symbol]
+  def self.call: (?untyped base, **untyped operations) -> Array[String]
+end
+
+class ClassList::List
+  @tokens: Array[String]
+
+  attr_reader tokens: Array[String]
+
+  def initialize: (?untyped base) -> void
+  def add: (String | Symbol | Array[untyped] | nil value) -> ClassList::List
+  def remove: (String | Symbol | Array[untyped] | nil value) -> ClassList::List
+  def replace: (String | Symbol | Array[untyped] | nil value) -> ClassList::List
+  def to_s: () -> String
+  def inspect: () -> String
+  def self.from_tokens: (Array[String] tokens) -> ClassList::List
+end
