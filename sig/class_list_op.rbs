@@ -6,6 +6,7 @@ module ClassList
   def self.resolve: (?untyped base, **untyped operations) -> String
   def self.call: (?untyped base, **untyped operations) -> String
   def self.list: (?untyped base) -> List
+  def self.merge_attributes: (?Hash[untyped, untyped] base, ?Hash[untyped, untyped] overrides, ?class_key: Symbol) -> Hash[untyped, untyped]
 end
 
 module ClassList::Tokenizer
@@ -15,6 +16,10 @@ end
 module ClassList::Resolver
   ALLOWED_KEYS: Array[Symbol]
   def self.call: (?untyped base, **untyped operations) -> Array[String]
+end
+
+module ClassList::AttributeMerger
+  def self.call: (?Hash[untyped, untyped] base, ?Hash[untyped, untyped] overrides, ?class_key: Symbol) -> Hash[untyped, untyped]
 end
 
 class ClassList::List

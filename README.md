@@ -56,6 +56,12 @@ list.to_s
 
 updated.tokens
 # => ["flex", "mb-4"]
+
+defaults = { class: "flex gap-4", id: "main" }
+overrides = { class: { add: "mb-4", remove: "gap-4" } }
+
+ClassList.merge_attributes(defaults, overrides)
+# => { class: "flex mb-4", id: "main" }
 ```
 
 ### Supported inputs
@@ -99,6 +105,41 @@ ClassList.resolve(defaults, add: "mb-4")
 
 ClassList.resolve(defaults, remove: "md:space-x-4", add: "md:space-x-6")
 # => "cols w-full md:flex md:flex-row md:space-x-6"
+```
+
+### Attribute adapter
+
+`ClassList.merge_attributes` is a thin adapter for component-style attribute hashes.
+
+- non-`class` attributes use normal hash merge semantics
+- `class: "..."` still fully overrides defaults
+- `class: { add:, remove:, replace: }` applies class operations against the default class value
+
+Arbre-style example:
+
+```ruby
+class Cols < BaseComponent
+  builder_method :cols
+
+  def build(attributes = {})
+    attributes = { breakpoint: :md }.merge(attributes)
+
+    direction = attributes.delete(:direction) || "row"
+    space = attributes.delete(:space) || "4"
+    breakpoint = attributes.delete(:breakpoint)
+    space_direction = direction.to_s.include?("row") ? "x" : "y"
+
+    defaults = {
+      class: "cols w-full #{breakpoint}:flex #{breakpoint}:flex-#{direction} #{breakpoint}:space-#{space_direction}-#{space}"
+    }
+
+    super(ClassList.merge_attributes(defaults, attributes))
+  end
+end
+
+cols class: { add: "mb-4", remove: "md:space-x-4" } do
+  # ...
+end
 ```
 
 ## Development

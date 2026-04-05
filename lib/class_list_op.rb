@@ -5,6 +5,7 @@ require_relative "class_list/errors"
 require_relative "class_list/tokenizer"
 require_relative "class_list/resolver"
 require_relative "class_list/list"
+require_relative "class_list/attribute_merger"
 
 module ClassList
   class << self
@@ -26,6 +27,10 @@ module ClassList
 
     def list(base = nil)
       List.new(base)
+    end
+
+    def merge_attributes(base = nil, overrides = nil, class_key: :class)
+      AttributeMerger.call(base, overrides, class_key: class_key)
     end
   end
 end

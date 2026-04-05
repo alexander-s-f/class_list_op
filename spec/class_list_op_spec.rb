@@ -91,4 +91,51 @@ RSpec.describe ClassList do
       expect(list.tokens).to be_frozen
     end
   end
+
+  describe ".merge_attributes" do
+    it "merges non-class attributes like a regular hash merge" do
+      defaults = { class: "flex gap-4", id: "main", data_role: "layout" }
+      overrides = { id: "sidebar" }
+
+      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+        class: "flex gap-4",
+        id: "sidebar",
+        data_role: "layout"
+      )
+    end
+
+    it "keeps regular class override semantics for string values" do
+      defaults = { class: "flex gap-4", id: "main" }
+      overrides = { class: "mb-4" }
+
+      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+        class: "mb-4",
+        id: "main"
+      )
+    end
+
+    it "resolves class operations against the default class list" do
+      defaults = { class: "cols w-full md:flex md:flex-row md:space-x-4" }
+      overrides = { class: { add: "mb-4", remove: "md:space-x-4" } }
+
+      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+        class: "cols w-full md:flex md:flex-row mb-4"
+      )
+    end
+
+    it "supports replace in class operations" do
+      defaults = { class: "flex gap-4", id: "main" }
+      overrides = { class: { replace: "grid gap-2" } }
+
+      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+        class: "grid gap-2",
+        id: "main"
+      )
+    end
+
+    it "raises for unsupported attribute input types" do
+      expect { described_class.merge_attributes([], {}) }
+        .to raise_error(ClassList::InvalidInputError, "unsupported attribute input: Array")
+    end
+  end
 end
