@@ -92,12 +92,12 @@ RSpec.describe ClassList do
     end
   end
 
-  describe ".merge_attributes" do
+  describe ".resolve_attributes" do
     it "merges non-class attributes like a regular hash merge" do
       defaults = { class: "flex gap-4", id: "main", data_role: "layout" }
       overrides = { id: "sidebar" }
 
-      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+      expect(described_class.resolve_attributes(defaults, overrides)).to eq(
         class: "flex gap-4",
         id: "sidebar",
         data_role: "layout"
@@ -108,7 +108,7 @@ RSpec.describe ClassList do
       defaults = { class: "flex gap-4", id: "main" }
       overrides = { class: "mb-4" }
 
-      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+      expect(described_class.resolve_attributes(defaults, overrides)).to eq(
         class: "mb-4",
         id: "main"
       )
@@ -118,7 +118,7 @@ RSpec.describe ClassList do
       defaults = { class: "cols w-full md:flex md:flex-row md:space-x-4" }
       overrides = { class: { add: "mb-4", remove: "md:space-x-4" } }
 
-      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+      expect(described_class.resolve_attributes(defaults, overrides)).to eq(
         class: "cols w-full md:flex md:flex-row mb-4"
       )
     end
@@ -127,7 +127,7 @@ RSpec.describe ClassList do
       defaults = { class: ["cols w-full md:flex", "md:flex-row md:space-x-4"] }
       overrides = { class: { add: "mb-4", remove: "md:space-x-4" } }
 
-      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+      expect(described_class.resolve_attributes(defaults, overrides)).to eq(
         class: "cols w-full md:flex md:flex-row mb-4"
       )
     end
@@ -136,15 +136,25 @@ RSpec.describe ClassList do
       defaults = { class: "flex gap-4", id: "main" }
       overrides = { class: { replace: "grid gap-2" } }
 
-      expect(described_class.merge_attributes(defaults, overrides)).to eq(
+      expect(described_class.resolve_attributes(defaults, overrides)).to eq(
         class: "grid gap-2",
         id: "main"
       )
     end
 
     it "raises for unsupported attribute input types" do
-      expect { described_class.merge_attributes([], {}) }
+      expect { described_class.resolve_attributes([], {}) }
         .to raise_error(ClassList::InvalidInputError, "unsupported attribute input: Array")
+    end
+  end
+
+  describe ".merge_attributes" do
+    it "aliases resolve_attributes" do
+      defaults = { class: "flex gap-4" }
+      overrides = { class: { add: "mb-4" } }
+
+      expect(described_class.merge_attributes(defaults, overrides))
+        .to eq(described_class.resolve_attributes(defaults, overrides))
     end
   end
 

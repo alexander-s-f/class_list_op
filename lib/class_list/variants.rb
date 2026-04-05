@@ -43,7 +43,7 @@ module ClassList
         merge_variant_attributes(result, attributes_for_slot(selected, slot_name))
       end
 
-      ClassList.merge_attributes(variant_attributes, normalize_attributes(overrides))
+      ClassList.resolve_attributes(variant_attributes, normalize_attributes(overrides))
     end
 
     def slots(**options)

@@ -30,9 +30,11 @@ module ClassList
       List.new(base)
     end
 
-    def merge_attributes(base = nil, overrides = nil, class_key: :class)
+    def resolve_attributes(base = nil, overrides = nil, class_key: :class)
       AttributeMerger.call(base, overrides, class_key: class_key)
     end
+
+    alias_method :merge_attributes, :resolve_attributes
 
     def variants(config)
       Variants.new(config)

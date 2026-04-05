@@ -6,6 +6,7 @@ module ClassList
   def self.resolve: (?untyped base, **untyped operations) -> String
   def self.call: (?untyped base, **untyped operations) -> String
   def self.list: (?untyped base) -> List
+  def self.resolve_attributes: (?Hash[untyped, untyped] base, ?Hash[untyped, untyped] overrides, ?class_key: Symbol) -> Hash[untyped, untyped]
   def self.merge_attributes: (?Hash[untyped, untyped] base, ?Hash[untyped, untyped] overrides, ?class_key: Symbol) -> Hash[untyped, untyped]
   def self.variants: (Hash[untyped, untyped] config) -> Variants
 end
