@@ -7,6 +7,7 @@ module ClassList
   def self.call: (?untyped base, **untyped operations) -> String
   def self.list: (?untyped base) -> List
   def self.merge_attributes: (?Hash[untyped, untyped] base, ?Hash[untyped, untyped] overrides, ?class_key: Symbol) -> Hash[untyped, untyped]
+  def self.variants: (Hash[untyped, untyped] config) -> Variants
 end
 
 module ClassList::Tokenizer
@@ -20,6 +21,14 @@ end
 
 module ClassList::AttributeMerger
   def self.call: (?Hash[untyped, untyped] base, ?Hash[untyped, untyped] overrides, ?class_key: Symbol) -> Hash[untyped, untyped]
+end
+
+class ClassList::Variants
+  def initialize: (Hash[untyped, untyped] config) -> void
+  def tokens: (?Symbol slot, **untyped options) -> Array[String]
+  def resolve: (?Symbol slot, **untyped options) -> String
+  def attributes: (?Symbol slot, **untyped options) -> Hash[untyped, untyped]
+  def slots: (**untyped options) -> Hash[Symbol, Hash[untyped, untyped]]
 end
 
 class ClassList::List

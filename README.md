@@ -62,6 +62,29 @@ overrides = { class: { add: "mb-4", remove: "gap-4" } }
 
 ClassList.merge_attributes(defaults, overrides)
 # => { class: "flex mb-4", id: "main" }
+
+button = ClassList.variants(
+  base: {
+    container: "font-medium whitespace-nowrap inline-flex items-center"
+  },
+  defaults: {
+    size: :md,
+    tone: :default
+  },
+  dimensions: {
+    size: {
+      xs: { container: "px-1.5 py-1 rounded-md text-xs" },
+      md: { container: "px-3 py-2 rounded-lg text-sm" }
+    },
+    tone: {
+      default: { container: "text-white bg-blue-600 hover:bg-blue-700" },
+      red: { container: "text-white bg-red-600 hover:bg-red-700" }
+    }
+  }
+)
+
+button.attributes(:container, tone: :red, class: { add: "w-full" })
+# => { class: "font-medium whitespace-nowrap inline-flex items-center px-3 py-2 rounded-lg text-sm text-white bg-red-600 hover:bg-red-700 w-full" }
 ```
 
 ### Supported inputs
@@ -124,22 +147,124 @@ class Cols < BaseComponent
   def build(attributes = {})
     attributes = { breakpoint: :md }.merge(attributes)
 
-    direction = attributes.delete(:direction) || "row"
-    space = attributes.delete(:space) || "4"
+    direction = attributes.delete(:direction) || :row
+    space = attributes.delete(:space) || 4
     breakpoint = attributes.delete(:breakpoint)
-    space_direction = direction.to_s.include?("row") ? "x" : "y"
 
-    defaults = {
-      class: "cols w-full #{breakpoint}:flex #{breakpoint}:flex-#{direction} #{breakpoint}:space-#{space_direction}-#{space}"
-    }
+    defaults = { class: cols_classes(direction:, space:, breakpoint:) }
 
     super(ClassList.merge_attributes(defaults, attributes))
+  end
+
+  def columns
+    children.grep(Col)
+  end
+
+  private
+
+  def cols_classes(direction:, space:, breakpoint:)
+    [
+      "cols w-full",
+      "#{breakpoint}:flex",
+      direction_variant(direction, space:, breakpoint:)
+    ]
+  end
+
+  def direction_variant(direction, space:, breakpoint:)
+    space_axis = direction.to_s.include?("row") ? "x" : "y"
+
+    [
+      "#{breakpoint}:flex-#{direction}",
+      "#{breakpoint}:space-#{space_axis}-#{space}"
+    ]
   end
 end
 
 cols class: { add: "mb-4", remove: "md:space-x-4" } do
   # ...
 end
+```
+
+### Variants
+
+`ClassList::Variants` automates the repetitive `base + selected variants + class operations` assembly without introducing a DSL.
+
+- config is just a Ruby hash and can come from YAML
+- all Tailwind classes stay as literal strings for extractor safety
+- dimensions are selected by key and merged in order
+- any non-dimension options are treated as final attribute overrides
+
+```ruby
+button = ClassList.variants(
+  base: {
+    container: "font-medium whitespace-nowrap text-center inline-flex items-center cursor-pointer",
+    icon: "shrink-0"
+  },
+  defaults: {
+    size: :md,
+    tone: :default
+  },
+  dimensions: {
+    size: {
+      xs: {
+        container: "px-1.5 py-1 rounded-md text-xs",
+        icon: "size-3"
+      },
+      md: {
+        container: "px-3 py-2 rounded-lg text-sm",
+        icon: "size-4"
+      }
+    },
+    tone: {
+      default: {
+        container: "text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+      },
+      red: {
+        container: "text-white bg-red-600 hover:bg-red-700 focus:ring-red-800"
+      }
+    }
+  }
+)
+
+button.attributes(:container, size: :xs, tone: :red)
+# => { class: "font-medium whitespace-nowrap text-center inline-flex items-center cursor-pointer px-1.5 py-1 rounded-md text-xs text-white bg-red-600 hover:bg-red-700 focus:ring-red-800" }
+
+button.attributes(:container, tone: :red, class: { add: "w-full" })
+# => { class: "... w-full" }
+
+button.attributes(:icon, size: :xs)
+# => { class: "shrink-0 size-3" }
+```
+
+`Col` can follow the same pattern:
+
+```ruby
+class Col < BaseComponent
+  builder_method :col
+
+  def build(size_or_options = "1/2", options = {})
+    options = { breakpoint: :md }.merge(options)
+    breakpoint = options.delete(:breakpoint)
+
+    defaults = { class: col_classes(size_or_options, breakpoint:) }
+
+    super(ClassList.merge_attributes(defaults, options))
+  end
+
+  private
+
+  def col_classes(size_or_options, breakpoint:)
+    case size_or_options
+    when Hash
+      size_or_options.map { |bp, size| "#{bp}:w-#{size}" }
+    else
+      ["#{breakpoint}:w-#{size_or_options}"]
+    end
+  end
+end
+
+col "1/2", class: { add: "mb-4" }
+col({ md: "1/2", xl: "1/3" }, class: { add: "self-start" })
 ```
 
 ## Development

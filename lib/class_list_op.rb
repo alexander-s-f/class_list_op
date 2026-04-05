@@ -6,6 +6,7 @@ require_relative "class_list/tokenizer"
 require_relative "class_list/resolver"
 require_relative "class_list/list"
 require_relative "class_list/attribute_merger"
+require_relative "class_list/variants"
 
 module ClassList
   class << self
@@ -31,6 +32,10 @@ module ClassList
 
     def merge_attributes(base = nil, overrides = nil, class_key: :class)
       AttributeMerger.call(base, overrides, class_key: class_key)
+    end
+
+    def variants(config)
+      Variants.new(config)
     end
   end
 end
